@@ -1,0 +1,46 @@
+#include <stdio.h>
+
+
+__global__void add(int )
+
+
+
+int main(void){
+    float *A, *x, *b, *d_A, *d_x, *d_b;
+    int M = 1024, N = 2048
+    /*  Assign  storage  and  initialize  values  */
+    A =  (float*) malloc(sizeof(float)*M*N) ;
+    x =  (float*) malloc(sizeof(float)*N) ;
+    b =  (float*) malloc(sizeof(float)*M) ;
+
+
+    cudaMalloc(&d_A, M*N*sizeof(float)); 
+    cudaMalloc(&d_x, N*sizeof(float));
+    cudaMalloc(&d_b, M*sizeof(float)); 
+
+
+
+    for(int i = 0; i<M; i++)
+        for(int j = 0; j<N; j++)
+            A[i*N*j] = rand() % 4 + 1;
+
+    for(int i = 0; i<N; i++)
+        x[i] = rand() % 4 + 1;
+
+    /* Matrix -vector  Product  */
+    for(int i = 0; i<M; i++){
+        b [i] = 0;
+        for(int j = 0; j<N; j++){
+            b[i] += x[j]*A [i*N + j];
+        }
+    }
+    cudaMemcpy(d_A, A, M*N*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_x, x, N*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, b, M*sizeof(float), cudaMemcpyHostToDevice);
+
+
+    /* Free  memory  allocations  */
+    free(A); free(x); free(b);
+    return 0;
+
+}   
